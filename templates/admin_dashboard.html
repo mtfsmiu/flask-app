@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-bg: #1b2635;
+            --secondary-bg: #2c3a47;
+            --sidebar-bg: #1e1e2d;
+            --text-color: #e1e1e1;
+            --hover-bg: #2d3446;
+            --border-color: #3f4865;
+            --purple-card: #6f42c1;
+            --blue-card: #0dcaf0;
+            --orange-card: #ffc107;
+            --red-card: #dc3545;
+        }
+
+        .light-theme {
+            --primary-bg: #f8f9fa;
+            --secondary-bg: #ffffff;
+            --sidebar-bg: #e9ecef;
+            --text-color: #343a40;
+            --hover-bg: #e2e6ea;
+            --border-color: #ced4da;
+        }
+
+        body {
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 250px;
+            background: var(--sidebar-bg);
+            padding: 1rem;
+            z-index: 1000;
+            transition: all 0.3s ease-in-out;
+            overflow-y: auto;
+        }
+
+        .sidebar.collapsed {
+            width: 60px;
+        }
+
+        .sidebar.collapsed .sidebar-brand span,
+        .sidebar.collapsed .nav-link span {
+            display: none;
+        }
+
+        .sidebar.collapsed .nav-link {
+            text-align: center;
+            padding: 0.75rem 0;
+        }
+
+        .sidebar.collapsed .nav-link i {
+            margin-right: 0;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 250px;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+        }
+
+        .sidebar-brand {
+            padding: 1rem;
+            font-size: 1.5rem;
+            color: var(--text-color);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar-nav {
+            margin-top: 2rem;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            color: var(--text-color);
+            padding: 0.75rem 1rem;
+            border-radius: 4px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: var(--hover-bg);
+            color: var(--text-color);
+        }
+
+        .nav-link i {
+            width: 20px;
+            margin-right: 10px;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            margin-left: 250px;
+            padding: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+                transition: margin-left 0.3s ease-in-out;
+            }
+
+            .main-content.sidebar-active {
+                margin-left: 250px;
+            }
+        }
+
+        /* Header Styles */
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: var(--secondary-bg);
+            margin: -2rem -2rem 2rem -2rem;
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-nav a {
+            color: var(--text-color);
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+
+        .header-nav a:hover {
+            background: var(--hover-bg);
+        }
+
+        /* Stats Cards */
+        .stats-card {
+            padding: 1.5rem;
+            border-radius: 8px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            height: 140px;
+            margin-bottom: 1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stats-card.purple { background: var(--purple-card); }
+        .stats-card.blue { background: var(--blue-card); }
+        .stats-card.orange { background: var(--orange-card); }
+        .stats-card.red { background: var(--red-card); }
+
+        .stats-card h3 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stats-card p {
+            margin: 0;
+            opacity: 0.8;
+        }
+
+        .stats-card .trend {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .stats-card canvas {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50px;
+        }
+
+        /* Tables */
+        .table-card {
+            background: var(--secondary-bg);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .table {
+            color: var(--text-color);
+        }
+
+        .table th {
+            border-top: none;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .table td {
+            border-color: var(--border-color);
+        }
+
+        .btn-action {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+            border-radius: 4px;
+            margin-right: 0.5rem;
+        }
+
+        /* Additional Styles */
+        .nav-group .nav-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .list-group-item {
+            background: var(--hover-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        .list-group-item:hover {
+            background: var(--secondary-bg);
+            color: var(--text-color);
+        }
+
+        /* Sidebar toggle button */
+        #sidebarToggle {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.5rem;
+            cursor: pointer;
+            position: fixed;
+            left: 10px;
+            top: 10px;
+            z-index: 1002;
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: none; /* Hide by default */
+            align-items: center;
+            justify-content: center;
+            background-color: var(--secondary-bg);
+            border-radius: 50%;
+        }
+
+        #sidebarToggle:hover {
+            background-color: var(--hover-bg);
+        }
+
+        @media (max-width: 768px) {
+            #sidebarToggle {
+                display: flex; /* Show only on mobile */
+            }
+        }
+
+        /* Responsive table */
+        @media screen and (max-width: 600px) {
+            table {
+                border: 0;
+            }
+            table caption {
+                font-size: 1.3em;
+            }
+            table thead {
+                border: none;
+                clip: rect(0 0 0 0);
+                height: 1px;
+                margin: -1px;
+                overflow: hidden;
+                padding: 0;
+                position: absolute;
+                width: 1px;
+            }
+            table tr {
+                border-bottom: 3px solid #ddd;
+                display: block;
+                margin-bottom: .625em;
+            }
+            table td {
+                border-bottom: 1px solid #ddd;
+                display: block;
+                font-size: .8em;
+                text-align: right;
+            }
+            table td::before {
+                content: attr(data-label);
+                float: left;
+                font-weight: bold;
+                text-transform: uppercase;
+            }
+            table td:last-child {
+                border-bottom: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar toggle button -->
+    <button id="sidebarToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <i class="fas fa-chart-line mr-2"></i>
+            <span>Admin Dashboard</span>
+        </div>
+        <div class="sidebar-nav">
+            <a href="{{ url_for('admin_dashboard') }}" class="nav-link active">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('dashboard') }}" class="nav-link">
+                <i class="fas fa-user"></i>
+                <span>View As User</span>
+            </a>
+            <div class="nav-group">
+                <a href="#manageSubmenu" data-toggle="collapse" class="nav-link">
+                    <i class="fas fa-cog"></i>
+                    <span>Manage</span>
+                    <i class="fas fa-chevron-down ml-auto"></i>
+                </a>
+                <div class="collapse" id="manageSubmenu">
+                    <a href="{{ url_for('manage_constituencies') }}" class="nav-link pl-5">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <span>Constituencies</span>
+                    </a>
+                    <a href="{{ url_for('manage_managers') }}" class="nav-link pl-5">
+                        <i class="fas fa-users-cog"></i>
+                        <span>Managers</span>
+                    </a>
+                    <a href="{{ url_for('manage_helpers') }}" class="nav-link pl-5">
+                        <i class="fas fa-hands-helping"></i>
+                        <span>Helpers</span>
+                    </a>
+                </div>
+            </div>
+            <a href="{{ url_for('logout') }}" class="nav-link">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Top Header -->
+        <div class="top-header">
+            <div class="breadcrumb text-muted mb-0">
+                Home / Dashboard
+            </div>
+            <div class="header-nav">
+                <a href="#" id="themeToggle"><i class="fas fa-sun"></i></a>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row">
+            <div class="col-md-3 col-sm-6">
+                <div class="stats-card purple">
+                    <h3>{{ users|length }}</h3>
+                    <p>Total Users</p>
+                    <div class="trend">Current Active Users</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="stats-card blue">
+                    <h3>{{ constituencies|length }}</h3>
+                    <p>Constituencies</p>
+                    <div class="trend">Total Registered</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="stats-card orange">
+                    <h3>{{ managers|length }}</h3>
+                    <p>Managers</p>
+                    <div class="trend">Active Managers</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="stats-card red">
+                    <h3>{{ helpers|length }}</h3>
+                    <p>Helpers</p>
+                    <div class="trend">Active Helpers</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Constituencies Table -->
+        <div class="table-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="mb-0">Constituencies</h5>
+                <a href="{{ url_for('manage_constituencies') }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus mr-2"></i>Manage Constituencies
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>MP</th>
+                            <th>MP Email</th>
+                            <th>Area</th>
+                            <th>County</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for constituency in constituencies[:10] %}
+                        <tr>
+                            <td data-label="ID">{{ constituency[0] }}</td>
+                            <td data-label="Name">{{ constituency[1] }}</td>
+                            <td data-label="MP">{{ constituency[2] }}</td>
+                            <td data-label="Area">{{ constituency[3] }}</td>
+                            <td data-label="Area">{{ constituency[4] }}</td>
+                            <td data-label="County">{{ constituency[5] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Managers Table -->
+        <div class="table-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="mb-0">Constituency Managers</h5>
+                <a href="{{ url_for('manage_managers') }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus mr-2"></i>Manage Managers
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Constituency</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Email</th>
+                            <th>Mobile</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for manager in managers %}
+                        <tr>
+                            <td data-label="ID">{{ manager[0] }}</td>
+                            <td data-label="Constituency">{{ manager[1] }}</td>
+                            <td data-label="First Name">{{ manager[2] }}</td>
+                            <td data-label="Last Name">{{ manager[3] }}</td>
+                            <td data-label="Email">{{ manager[5] }}</td>
+                            <td data-label="Mobile">{{ manager[6] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Helpers Table -->
+        <div class="table-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="mb-0">Helpers</h5>
+                <a href="{{ url_for('manage_helpers') }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus mr-2"></i>Manage Helpers
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Manager</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Email</th>
+                            <th>Mobile</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for helper in helpers %}
+                        <tr>
+                            <td data-label="ID">{{ helper[0] }}</td>
+                            <td data-label="Manager">{{ helper[1] }}</td>
+                            <td data-label="First Name">{{ helper[2] }}</td>
+                            <td data-label="Last Name">{{ helper[3] }}</td>
+                            <td data-label="Email">{{ helper[5] }}</td>
+                            <td data-label="Mobile">{{ helper[6] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Report Links Section -->
+        <div class="table-card">
+            <h5 class="mb-4">
+                <i class="fas fa-file-alt mr-2"></i>Reports
+            </h5>
+            <div class="list-group">
+                <a href="{{ url_for('reports') }}" class="list-group-item list-group-item-action d-flex align-items-center">
+                    <i class="fas fa-chart-bar mr-3"></i>
+                    View Reports
+                    <i class="fas fa-chevron-right ml-auto"></i>
+                </a>
+            </div>
+        </div>
+        <!-- Users Table -->
+        <div class="table-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="mb-0">Users</h5>
+                <a href="{{ url_for('create_user_page') }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus mr-2"></i>Add User
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td data-label="ID">{{ user[0] }}</td>
+                            <td data-label="Name">{{ user[1] }}</td>
+                            <td data-label="Email">{{ user[2] }}</td>
+                            <td data-label="Actions">
+                                <a href="{{ url_for('update_user_page', user_id=user[0]) }}" class="btn btn-info btn-action">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{{ url_for('delete_user', user_id=user[0]) }}" class="btn btn-danger btn-action"
+                                    onclick="return confirm('Are you sure you want to delete this user?')">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+        const icon = themeToggle.querySelector('i');
+
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('light-theme');
+            icon.classList.toggle('fa-sun');
+            icon.classList.toggle('fa-moon');
+        });
+
+        // Sidebar toggle functionality
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+            // mainContent.classList.toggle('sidebar-active');
+            sidebarToggle.querySelector('i').classList.toggle('fa-bars');
+            sidebarToggle.querySelector('i').classList.toggle('fa-times');
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768 && !sidebar.contains(e.target) && e.target !== sidebarToggle) {
+                sidebar.classList.remove('active');
+                // mainContent.classList.remove('sidebar-active');
+                sidebarToggle.querySelector('i').classList.remove('fa-times');
+                sidebarToggle.querySelector('i').classList.add('fa-bars');
+            }
+        });
+
+        // Responsive sidebar behavior
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('active');
+                // mainContent.classList.remove('sidebar-active');
+                sidebarToggle.querySelector('i').classList.remove('fa-times');
+                sidebarToggle.querySelector('i').classList.add('fa-bars');
+            }
+        });
+
+        // Dropdown functionality
+        $('.nav-group > a').on('click', function(e) {
+            e.preventDefault();
+            $(this).parent().find('.collapse').collapse('toggle');
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768 && !sidebar.contains(e.target) && e.target !== sidebarToggle) {
+                sidebar.classList.remove('active');
+            }
+        });
+
+        // Responsive sidebar behavior
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
+

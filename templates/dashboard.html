@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --transition-speed: 0.2s;
+            --border-radius: 8px;
+        }
+
+        :root[data-theme="light"] {
+            --bg-color: #f0f4f8;
+            --text-color: #333333;
+            --nav-bg: #ffffff;
+            --card-bg: #ffffff;
+            --table-header: #e2e8f0;
+            --table-border: #cbd5e0;
+            --hover-color: #edf2f7;
+            --active-color: #4299e1;
+            --search-bg: #ffffff;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        :root[data-theme="dark"] {
+            --bg-color: #1a202c;
+            --text-color: #e2e8f0;
+            --nav-bg: #2d3748;
+            --card-bg: #2d3748;
+            --table-header: #4a5568;
+            --table-border: #4a5568;
+            --hover-color: #3a4a5e;
+            --active-color: #63b3ed;
+            --search-bg: #2d3748;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color var(--transition-speed), color var(--transition-speed);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: var(--nav-bg);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-color);
+            text-decoration: none;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .theme-switch, .logout-button {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0.5rem;
+            border-radius: var(--border-radius);
+            transition: background-color var(--transition-speed);
+        }
+
+        .theme-switch:hover, .logout-button:hover {
+            background-color: var(--hover-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .search-form input {
+            flex: 1;
+            min-width: 200px;
+            padding: 0.8rem;
+            border: 1px solid var(--table-border);
+            border-radius: var(--border-radius);
+            background-color: var(--search-bg);
+            color: var(--text-color);
+        }
+
+        .search-form button {
+            padding: 0.8rem 1.5rem;
+            background-color: var(--active-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: opacity var(--transition-speed);
+        }
+
+        .search-form button:hover {
+            opacity: 0.9;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--table-border);
+        }
+
+        th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color var(--transition-speed);
+        }
+
+        th:hover {
+            background-color: var(--hover-color);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: var(--hover-color);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+
+        .pagination a {
+            color: var(--text-color);
+            padding: 0.8rem 1rem;
+            text-decoration: none;
+            border: 1px solid var(--table-border);
+            border-radius: var(--border-radius);
+            min-width: 40px;
+            text-align: center;
+            transition: background-color var(--transition-speed), color var(--transition-speed);
+        }
+
+        .pagination a.active {
+            background-color: var(--active-color);
+            color: white;
+            border-color: var(--active-color);
+        }
+
+        .pagination a:hover:not(.active) {
+            background-color: var(--hover-color);
+        }
+
+        .loading-spinner {
+            display: none;
+            border: 4px solid var(--table-border);
+            border-top: 4px solid var(--active-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .details-button {
+            background-color: var(--active-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: opacity var(--transition-speed);
+        }
+
+        .details-button:hover {
+            opacity: 0.9;
+        }
+
+        .download-button {
+            display: inline-flex;
+            align-items: center;
+            background-color: var(--active-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: opacity var(--transition-speed);
+            margin-top: 1rem;
+        }
+
+        .download-button:hover {
+            opacity: 0.9;
+        }
+
+        .download-button i {
+            margin-right: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .navbar, .container {
+                padding: 1rem;
+            }
+
+            th, td {
+                padding: 0.75rem;
+            }
+
+            .pagination a {
+                padding: 0.6rem 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+
+            .search-form {
+                flex-direction: column;
+            }
+
+            .search-form input,
+            .search-form button {
+                width: 100%;
+            }
+
+            .pagination {
+                gap: 0.25rem;
+            }
+
+            .pagination a {
+                padding: 0.5rem;
+                min-width: 35px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="#" class="navbar-brand">Constituency Portal</a>
+        <div class="nav-buttons">
+            <button class="theme-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+                <i class="fas fa-moon"></i>
+            </button>
+            <button class="logout-button" onclick="logout()" aria-label="Logout">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <h1>Welcome, {{ user[1] }}!</h1>
+            
+            <form method="POST" class="search-form">
+                <input type="text" name="search" placeholder="Search constituencies..." value="{{ request.form.get('search', '') }}" aria-label="Search constituencies">
+                <button type="submit" aria-label="Search">
+                    <i class="fas fa-search"></i> Search
+                </button>
+                <button type="button" onclick="clearSearch()" aria-label="Clear search">
+                    <i class="fas fa-times"></i> Clear
+                </button>
+            </form>
+        </div>
+
+        <div class="card">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable(0)">Name <i class="fas fa-sort"></i></th>
+                            <th onclick="sortTable(1)">MP <i class="fas fa-sort"></i></th>
+                            <th onclick="sortTable(2)">Area <i class="fas fa-sort"></i></th>
+                            <th onclick="sortTable(3)">Country <i class="fas fa-sort"></i></th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+    {% for constituency in constituencies %}
+    <tr>
+        <td>{{ constituency[1] }}</td>
+        <td>{{ constituency[2] }}</td>
+        <td>{{ constituency[3] }}</td>
+        <td>{{ constituency[4] }}</td>
+        <td>
+            <button class="details-button" onclick="viewDetails('{{ constituency[0] }}')">
+                <i class="fas fa-info-circle"></i> Details
+            </button>
+        </td>
+    </tr>
+    {% endfor %}
+</tbody>
+                </table>
+            </div>
+
+            <div class="loading-spinner" id="loadingSpinner"></div>
+
+            <div class="pagination">
+                {% if current_page > 1 %}
+                    <a href="{{ url_for('dashboard', page=current_page-1, per_page=per_page, search=request.form.get('search', '')) }}" aria-label="Previous page">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                {% endif %}
+                
+                {% for page_num in range(1, total_pages + 1) %}
+                    <a href="{{ url_for('dashboard', page=page_num, per_page=per_page, search=request.form.get('search', '')) }}" 
+                       {% if page_num == current_page %}class="active"{% endif %} aria-label="Page {{ page_num }}">
+                        {{ page_num }}
+                    </a>
+                {% endfor %}
+                
+                {% if current_page < total_pages %}
+                    <a href="{{ url_for('dashboard', page=current_page+1, per_page=per_page, search=request.form.get('search', '')) }}" aria-label="Next page">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                {% endif %}
+            </div>
+
+            <button class="download-button" onclick="downloadCSV()" aria-label="Download CSV">
+                <i class="fas fa-download"></i> Download CSV
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', newTheme);
+            
+            const themeIcon = document.querySelector('.theme-switch i');
+            themeIcon.className = newTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+            
+            localStorage.setItem('theme', newTheme);
+        }
+
+        function clearSearch() {
+            document.querySelector('.search-form input').value = '';
+            document.querySelector('.search-form').submit();
+        }
+
+        function sortTable(columnIndex) {
+            const table = document.querySelector('table');
+            const rows = Array.from(table.querySelectorAll('tbody tr'));
+            const isAscending = table.querySelectorAll('th')[columnIndex].classList.toggle('asc');
+
+            rows.sort((a, b) => {
+                const aValue = a.querySelectorAll('td')[columnIndex].textContent.trim();
+                const bValue = b.querySelectorAll('td')[columnIndex].textContent.trim();
+                return isAscending ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+            });
+
+            table.querySelector('tbody').innerHTML = '';
+            rows.forEach(row => table.querySelector('tbody').appendChild(row));
+        }
+
+        function viewDetails(id) {
+            alert(`Viewing details for constituency ID: ${id}`);
+        }
+
+        function downloadCSV() {
+            const rows = document.querySelectorAll('table tr');
+            let csvContent = "data:text/csv;charset=utf-8,";
+
+            rows.forEach(row => {
+                const rowData = Array.from(row.querySelectorAll('th, td')).map(cell => cell.textContent.trim());
+                csvContent += rowData.join(",") + "\r\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "constituencies.csv");
+            document.body.appendChild(link);
+            link.click();
+        }
+
+        function logout() {
+            fetch('/logout', {
+                method: 'POST',
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url; // Redirect to login page
+                }
+            })
+            .catch(error => {
+                console.error('Error during logout:', error);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            
+            const themeIcon = document.querySelector('.theme-switch i');
+            themeIcon.className = savedTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+        });
+    </script>
+</body>
+</html>
+

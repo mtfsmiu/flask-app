@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add User</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        :root {
+            --primary-bg: #1b2635;
+            --secondary-bg: #2c3a47;
+            --sidebar-bg: #1e1e2d;
+            --text-color: #e1e1e1;
+            --hover-bg: #2d3446;
+            --border-color: #3f4865;
+            --purple-card: #6f42c1;
+            --blue-card: #0dcaf0;
+            --orange-card: #ffc107;
+            --red-card: #dc3545;
+        }
+
+        .light-theme {
+            --primary-bg: #f8f9fa;
+            --secondary-bg: #ffffff;
+            --sidebar-bg: #e9ecef;
+            --text-color: #343a40;
+            --hover-bg: #e2e6ea;
+            --border-color: #ced4da;
+        }
+
+        body {
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 250px;
+            background: var(--sidebar-bg);
+            padding: 1rem;
+            z-index: 1000;
+            transition: all 0.3s ease-in-out;
+            overflow-y: auto;
+        }
+
+        .sidebar.collapsed {
+            width: 60px;
+        }
+
+        .sidebar-brand {
+            padding: 1rem;
+            font-size: 1.5rem;
+            color: var(--text-color);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar-nav {
+            margin-top: 2rem;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            color: var(--text-color);
+            padding: 0.75rem 1rem;
+            border-radius: 4px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: var(--hover-bg);
+            color: var(--text-color);
+        }
+
+        .nav-link i {
+            width: 20px;
+            margin-right: 10px;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            margin-left: 250px;
+            padding: 2rem;
+        }
+
+        .form-container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: var(--secondary-bg);
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--text-color);
+        }
+
+        .form-group label {
+            font-weight: bold;
+            color: var(--text-color);
+            margin-bottom: 0;
+        }
+
+        .form-control {
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 1rem;
+            background-color: var(--hover-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .form-control:focus {
+            border-color: var(--blue-card);
+            box-shadow: none;
+        }
+
+        .btn-danger {
+            background-color: var(--red-card);
+            border: none;
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        .input-group .form-control {
+            background-color: var(--hover-bg);
+            color: var(--text-color);
+        }
+
+        .form-group i {
+            position: absolute;
+            right: 10px;
+            top: 12px;
+            color: var(--blue-card);
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .form-container {
+                padding: 15px;
+            }
+
+            .form-group {
+                margin-bottom: 15px;
+            }
+        }
+
+        #sidebarToggle {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            #sidebarToggle {
+                display: block;
+                position: fixed;
+                left: 10px;
+                top: 10px;
+                z-index: 1001;
+                background: none;
+                border: none;
+                color: var(--text-color);
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar toggle button -->
+    <button id="sidebarToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <i class="fas fa-chart-line mr-2"></i>
+            <span>Admin Dashboard</span>
+        </div>
+        <div class="sidebar-nav">
+            <a href="{{ url_for('admin_dashboard') }}" class="nav-link">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('dashboard') }}" class="nav-link">
+                <i class="fas fa-user"></i>
+                <span>View As User</span>
+            </a>
+            <div class="nav-group">
+                <a href="#manageSubmenu" data-toggle="collapse" class="nav-link">
+                    <i class="fas fa-cog"></i>
+                    <span>Manage</span>
+                    <i class="fas fa-chevron-down ml-auto"></i>
+                </a>
+                <div class="collapse" id="manageSubmenu">
+                    <a href="{{ url_for('manage_constituencies') }}" class="nav-link pl-5">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <span>Constituencies</span>
+                    </a>
+                    <a href="{{ url_for('manage_managers') }}" class="nav-link pl-5">
+                        <i class="fas fa-users-cog"></i>
+                        <span>Managers</span>
+                    </a>
+                    <a href="{{ url_for('manage_helpers') }}" class="nav-link pl-5">
+                        <i class="fas fa-hands-helping"></i>
+                        <span>Helpers</span>
+                    </a>
+                </div>
+            </div>
+            <a href="{{ url_for('logout') }}" class="nav-link">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <div class="container">
+            <div class="form-container">
+                <h2>Add User</h2>
+                <form method="POST">
+                    <div class="form-group">
+                        <label for="name">Name:</label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="Enter name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email_address">Email Address:</label>
+                        <input type="email" class="form-control" id="email_address" name="email_address" placeholder="Enter email address" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required>
+                            <div class="input-group-append">
+                                <span class="input-group-text"><i class="fas fa-eye" id="togglePassword"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-danger btn-block">Create User</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        // Toggle password visibility
+        const togglePassword = document.querySelector("#togglePassword");
+        const password = document.querySelector("#password");
+
+        togglePassword.addEventListener("click", function () {
+            const type = password.getAttribute("type") === "password" ? "text" : "password";
+            password.setAttribute("type", type);
+            this.classList.toggle("fa-eye-slash");
+        });
+
+        // Sidebar toggle functionality
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+            sidebarToggle.querySelector('i').classList.toggle('fa-bars');
+            sidebarToggle.querySelector('i').classList.toggle('fa-times');
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768 && !sidebar.contains(e.target) && e.target !== sidebarToggle) {
+                sidebar.classList.remove('active');
+                sidebarToggle.querySelector('i').classList.remove('fa-times');
+                sidebarToggle.querySelector('i').classList.add('fa-bars');
+            }
+        });
+
+        // Responsive sidebar behavior
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('active');
+                sidebarToggle.querySelector('i').classList.remove('fa-times');
+                sidebarToggle.querySelector('i').classList.add('fa-bars');
+            }
+        });
+
+        // Dropdown functionality
+        $('.nav-group > a').on('click', function(e) {
+            e.preventDefault();
+            $(this).parent().find('.collapse').collapse('toggle');
+        });
+    </script>
+</body>
+</html>
