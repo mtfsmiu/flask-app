@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Helpers</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        :root {
+            --primary-bg: #1b2635;
+            --secondary-bg: #2c3a47;
+            --sidebar-bg: #1e1e2d;
+            --text-color: #e1e1e1;
+            --hover-bg: #2d3446;
+            --border-color: #3f4865;
+        }
+
+        .light-theme {
+            --primary-bg: #f8f9fa;
+            --secondary-bg: #ffffff;
+            --sidebar-bg: #e9ecef;
+            --text-color: #343a40;
+            --hover-bg: #e2e6ea;
+            --border-color: #ced4da;
+        }
+
+        body {
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 250px;
+            background: var(--sidebar-bg);
+            padding: 1rem;
+            z-index: 1000;
+            transition: all 0.3s ease-in-out;
+            overflow-y: auto;
+        }
+
+        .sidebar.collapsed {
+            width: 60px;
+        }
+
+        .sidebar.collapsed .sidebar-brand span,
+        .sidebar.collapsed .nav-link span {
+            display: none;
+        }
+
+        .sidebar.collapsed .nav-link {
+            text-align: center;
+            padding: 0.75rem 0;
+        }
+
+        .sidebar.collapsed .nav-link i {
+            margin-right: 0;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 250px;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+        }
+
+        .sidebar-brand {
+            padding: 1rem;
+            font-size: 1.5rem;
+            color: var(--text-color);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar-nav {
+            margin-top: 2rem;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            color: var(--text-color);
+            padding: 0.75rem 1rem;
+            border-radius: 4px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: var(--hover-bg);
+            color: var(--text-color);
+        }
+
+        .nav-link i {
+            width: 20px;
+            margin-right: 10px;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            margin-left: 250px;
+            padding: 2rem;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+            }
+
+            .main-content.sidebar-active {
+                margin-left: 250px;
+            }
+        }
+
+        /* Header Styles */
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: var(--secondary-bg);
+            margin: -2rem -2rem 2rem -2rem;
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-nav a {
+            color: var(--text-color);
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+
+        .header-nav a:hover {
+            background: var(--hover-bg);
+        }
+
+        /* Sidebar toggle button */
+        #sidebarToggle {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.5rem;
+            cursor: pointer;
+            position: fixed;
+            left: 10px;
+            top: 10px;
+            z-index: 1002;
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: none;
+            /* Hide by default */
+            align-items: center;
+            justify-content: center;
+            background-color: var(--secondary-bg);
+            border-radius: 50%;
+        }
+
+        #sidebarToggle:hover {
+            background-color: var(--hover-bg);
+        }
+
+        @media (max-width: 768px) {
+            #sidebarToggle {
+                display: flex;
+                /* Show only on mobile */
+            }
+        }
+
+        /* Cards and Tables */
+        .card {
+            background-color: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        .table {
+            color: var(--text-color);
+        }
+
+        .table th {
+            border-color: var(--border-color);
+        }
+
+        .table td {
+            border-color: var(--border-color);
+        }
+
+        .btn-action {
+            color: var(--text-color);
+        }
+
+        .alert {
+            background-color: rgb(255, 0, 0);
+            color: white;
+            border-color: rgb(255, 0, 0);
+        }
+
+        .alert-success {
+            background-color: limegreen;
+            color: white;
+            border-color: limegreen;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar toggle button -->
+    <button id="sidebarToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <i class="fas fa-chart-line mr-2"></i>
+            <span>Admin Dashboard</span>
+        </div>
+        <div class="sidebar-nav">
+            <a href="{{ url_for('admin_dashboard') }}" class="nav-link active">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('dashboard') }}" class="nav-link">
+                <i class="fas fa-user"></i>
+                <span>View As User</span>
+            </a>
+            <div class="nav-group">
+                <a href="#manageSubmenu" data-toggle="collapse" class="nav-link">
+                    <i class="fas fa-cog"></i>
+                    <span>Manage</span>
+                    <i class="fas fa-chevron-down ml-auto"></i>
+                </a>
+                <div class="collapse" id="manageSubmenu">
+                    <a href="{{ url_for('manage_constituencies') }}" class="nav-link pl-5">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <span>Constituencies</span>
+                    </a>
+                    <a href="{{ url_for('manage_managers') }}" class="nav-link pl-5">
+                        <i class="fas fa-users-cog"></i>
+                        <span>Managers</span>
+                    </a>
+                    <a href="{{ url_for('manage_helpers') }}" class="nav-link pl-5">
+                        <i class="fas fa-hands-helping"></i>
+                        <span>Helpers</span>
+                    </a>
+                </div>
+            </div>
+            <a href="{{ url_for('logout') }}" class="nav-link">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Top Header -->
+        <div class="top-header">
+            <div class="breadcrumb text-muted mb-0">
+                Home / Manage Helpers
+            </div>
+            <div class="header-nav">
+                <a href="#" id="themeToggle"><i class="fas fa-sun"></i></a>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} text-light">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <!-- Create Helper Form -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Add New Helper</h4>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('create_helper') }}" method="POST">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="manager_id" class="form-label">Manager</label>
+                            <select name="manager_id" class="form-select" required>
+                                <option value="">Select Manager</option>
+                                {% for manager in managers %}
+                                <option value="{{ manager[0] }}">{{ manager[1] }} {{ manager[2] }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="first_name" class="form-label">First Name</label>
+                            <input type="text" class="form-control" name="first_name" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="last_name" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" name="last_name" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="hometown" class="form-label">Hometown</label>
+                            <input type="text" class="form-control" name="hometown" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="email_address" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" name="email_address" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="mobile" class="form-label">Mobile</label>
+                            <input type="tel" class="form-control" name="mobile">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="origin" class="form-label">Origin</label>
+                            <select name="origin" class="form-control" required>
+                                <option value="Facebook">Facebook</option>
+                                <option value="Instagram">Instagram</option>
+                                <option value="LinkedIn">LinkedIn</option>
+                                <option value="Direct">Direct</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="origin_details" class="form-label">Origin Details</label>
+                            <textarea class="form-control" name="origin_details" rows="2"></textarea>
+                        </div>
+                        <div id="originDetails" style="display: none;">
+                            <label>Specify Other Origin:</label>
+                            <input type="text" name="origin_details" class="form-control">
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label for="comments" class="form-label">
+                                <i class="fas fa-comment me-2"></i>Comments
+                            </label>
+                            <textarea class="form-control" name="comments" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-success">Add Helper</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- List of Helpers -->
+        <div class="card">
+            <div class="card-header">
+                <h4>Current Helpers</h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Manager</th>
+                                <th>Full Name</th>
+                                <th>Hometown</th>
+                                <th>Email</th>
+                                <th>Mobile</th>
+                                <th>Origin</th>
+                                <th>Comments</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for helper in helpers %}
+                            <tr>
+                                <td>{{ helper[0] }}</td>
+                                <td>{{ helper[1] }}</td>
+                                <td>{{ helper[2] }} {{ helper[3] }}</td>
+                                <td>{{ helper[4] }}</td>
+                                <td>{{ helper[5] }}</td>
+                                <td>{{ helper[6] }}</td>
+                                <td>{{ helper[7] }}</td>
+                                <td>{{ helper[9] }}</td>
+                                <td>
+                                    <button class="btn btn-warning btn-sm" data-bs-toggle="modal"
+                                        data-bs-target="#editModal{{ helper[0] }}">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" data-bs-toggle="modal"
+                                        data-bs-target="#deleteModal{{ helper[0] }}">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <!-- Edit Modal -->
+                            <div class="modal fade" id="editModal{{ helper[0] }}" tabindex="-1">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Edit Helper</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form action="{{ url_for('update_helper') }}" method="POST">
+                                                <input type="hidden" name="helper_id" value="{{ helper[0] }}">
+                                                <div class="row">
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="manager_id" class="form-label">Manager</label>
+                                                        <select name="manager_id" class="form-select" required>
+                                                            {% for manager in managers %}
+                                                            <option value="{{ manager[0] }}" {% if manager[0]==helper[1]
+                                                                %}selected{% endif %}>
+                                                                {{ manager[1] }} {{ manager[2] }}
+                                                            </option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="first_name" class="form-label">First
+                                                            Name</label>
+                                                        <input type="text" class="form-control" name="first_name"
+                                                            value="{{ helper[2] }}" required>
+                                                    </div>
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="last_name" class="form-label">Last
+                                                            Name</label>
+                                                        <input type="text" class="form-control" name="last_name"
+                                                            value="{{ helper[3] }}" required>
+                                                    </div>
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="hometown" class="form-label">Hometown</label>
+                                                        <input type="text" class="form-control" name="hometown"
+                                                            value="{{ helper[4] }}" required>
+                                                    </div>
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="email_address" class="form-label">Email
+                                                            Address</label>
+                                                        <input type="email" class="form-control" name="email_address"
+                                                            value="{{ helper[5] }}" required>
+                                                    </div>
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="mobile" class="form-label">Mobile</label>
+                                                        <input type="tel" class="form-control" name="mobile"
+                                                            value="{{ helper[6] }}" required>
+                                                    </div>
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="origin" class="form-label">Origin</label>
+                                                        <input type="text" class="form-control" name="origin"
+                                                            value="{{ helper[7] }}" required>
+                                                    </div>
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="origin_details" class="form-label">Origin
+                                                            Details</label>
+                                                        <textarea class="form-control" name="origin_details"
+                                                            rows="2">{{ helper[8] }}</textarea>
+                                                    </div>
+                                                    <div class="col-md-12 mb-3">
+                                                        <label for="comments" class="form-label">
+                                                            <i class="fas fa-comment me-2"></i>Comments
+                                                        </label>
+                                                        <textarea class="form-control" name="comments" rows="3">{{ helper[9] }}</textarea>
+                                                    </div>
+                                                </div>
+                                                <button type="submit" class="btn btn-warning">Update Helper</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Delete Modal -->
+                            <div class="modal fade" id="deleteModal{{ helper[0] }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Confirm Delete</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>Are you sure you want to delete helper {{ helper[2] }}
+                                                {{ helper[3] }}?</p>
+                                            <p class="text-danger">This action cannot be undone.</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <form action="{{ url_for('delete_helper', helper_id=helper[0]) }}"
+                                                method="POST">
+                                                <button type="button" class="btn btn-secondary"
+                                                    data-bs-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        // Immediately-invoked function to avoid polluting global scope
+        (() => {
+            // Theme management system
+            const themeToggle = document.getElementById('themeToggle');
+            const body = document.body;
+            const themeIcon = themeToggle.querySelector('i');
+            const STORAGE_KEY = 'userTheme';
+            
+            // Initialize theme from storage or system preference
+            function initTheme() {
+                const savedTheme = localStorage.getItem(STORAGE_KEY);
+                const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                
+                if (savedTheme === 'light' || (!savedTheme && !systemDark)) {
+                    body.classList.add('light-theme');
+                    themeIcon.classList.replace('fa-moon', 'fa-sun');
+                }
+            }
+        
+            // Theme toggle handler
+            function handleThemeToggle() {
+                body.classList.toggle('light-theme');
+                const isLight = body.classList.contains('light-theme');
+                
+                themeIcon.classList.replace(isLight ? 'fa-moon' : 'fa-sun', isLight ? 'fa-sun' : 'fa-moon');
+                localStorage.setItem(STORAGE_KEY, isLight ? 'light' : 'dark');
+            }
+        
+            // Sidebar management system
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const SIDEBAR_STORAGE_KEY = 'sidebarState';
+            
+            // Initialize sidebar state
+            function initSidebar() {
+                const sidebarState = localStorage.getItem(SIDEBAR_STORAGE_KEY);
+                if (window.innerWidth > 768 && sidebarState === 'collapsed') {
+                    sidebar.classList.add('collapsed');
+                    mainContent.classList.add('collapsed');
+                }
+            }
+        
+            // Sidebar toggle handler
+            function handleSidebarToggle() {
+                sidebar.classList.toggle('active');
+                mainContent.classList.toggle('sidebar-active');
+                
+                const icon = sidebarToggle.querySelector('i');
+                icon.classList.toggle('fa-bars');
+                icon.classList.toggle('fa-times');
+        
+                // Update ARIA labels
+                const isExpanded = sidebar.classList.contains('active');
+                sidebarToggle.setAttribute('aria-expanded', isExpanded);
+                
+                // Save state for desktop
+                if (window.innerWidth > 768) {
+                    localStorage.setItem(SIDEBAR_STORAGE_KEY, isExpanded ? 'expanded' : 'collapsed');
+                }
+            }
+        
+            // Responsive handlers
+            function handleWindowResize() {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.remove('active');
+                    mainContent.classList.remove('sidebar-active');
+                    sidebarToggle.querySelector('i').classList.replace('fa-times', 'fa-bars');
+                }
+            }
+        
+            // Event listeners
+            function setupEventListeners() {
+                // Theme interactions
+                themeToggle.addEventListener('click', handleThemeToggle);
+                themeToggle.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') handleThemeToggle();
+                });
+        
+                // Sidebar interactions
+                sidebarToggle.addEventListener('click', handleSidebarToggle);
+                sidebarToggle.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') handleSidebarToggle();
+                });
+        
+                // Document click handler
+                document.addEventListener('click', (e) => {
+                    if (window.innerWidth <= 768 && 
+                        !sidebar.contains(e.target) && 
+                        e.target !== sidebarToggle) {
+                        handleSidebarToggle();
+                    }
+                });
+        
+                // Window resize handler with debounce
+                let resizeTimeout;
+                window.addEventListener('resize', () => {
+                    clearTimeout(resizeTimeout);
+                    resizeTimeout = setTimeout(handleWindowResize, 100);
+                });
+        
+                // Accessible dropdown handlers
+                document.querySelectorAll('.nav-group > a').forEach(trigger => {
+                    trigger.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const collapseSection = trigger.parentElement.querySelector('.collapse');
+                        const isExpanded = collapseSection.classList.contains('show');
+                        
+                        collapseSection.classList.toggle('show');
+                        trigger.setAttribute('aria-expanded', !isExpanded);
+                    });
+                });
+            }
+        
+            // Initial setup
+            function init() {
+                initTheme();
+                initSidebar();
+                setupEventListeners();
+                
+                // Set initial ARIA states
+                sidebarToggle.setAttribute('aria-label', 'Toggle navigation menu');
+                themeToggle.setAttribute('aria-label', 'Toggle theme');
+                sidebarToggle.setAttribute('aria-expanded', 'false');
+            }
+        
+            // Start the application
+            init();
+        })();
+        </script>
+</body>
+
+</html>

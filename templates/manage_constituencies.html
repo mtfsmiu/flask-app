@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Constituencies</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-bg: #f8f9fa;
+            --secondary-bg: #ffffff;
+            --sidebar-bg: #e9ecef;
+            --text-color: #343a40;
+            --hover-bg: #e2e6ea;
+            --border-color: #ced4da;
+            --table-bg: #ffffff;
+            --table-hover-bg: #f8f9fa;
+        }
+
+        .dark-theme {
+            --primary-bg: #1b2635;
+            --secondary-bg: #2c3a47;
+            --sidebar-bg: #1e1e2d;
+            --text-color: #e1e1e1;
+            --hover-bg: #2d3446;
+            --border-color: #3f4865;
+            --table-bg: #2c3a47;
+            --table-hover-bg: #3a4b5e;
+        }
+
+        body {
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .navbar, .card, .modal-content {
+            background-color: var(--secondary-bg);
+            color: var(--text-color);
+        }
+
+        .form-control, .btn-primary, .btn-secondary {
+            background-color: var(--primary-bg);
+            border-color: var(--border-color);
+            color: var(--text-color);
+        }
+
+        .form-control:focus, .btn-primary:hover, .btn-secondary:hover {
+            background-color: var(--hover-bg);
+            border-color: var(--border-color);
+            color: var(--text-color);
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 250px;
+            background: var(--sidebar-bg);
+            padding: 1rem;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sidebar-brand {
+            padding: 1rem;
+            font-size: 1.5rem;
+            color: var(--text-color);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar-nav {
+            margin-top: 2rem;
+        }
+
+        .nav-link {
+            color: var(--text-color);
+            padding: 0.75rem 1rem;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: var(--hover-bg);
+            color: var(--text-color);
+        }
+
+        .nav-link i {
+            width: 20px;
+            margin-right: 10px;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 250px;
+            padding: 2rem;
+        }
+
+        /* Theme Switch */
+        .theme-switch {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .theme-switch .form-check-input {
+            cursor: pointer;
+            width: 60px;
+            height: 30px;
+        }
+
+        .theme-switch .form-check-label {
+            cursor: pointer;
+            width: 60px;
+            height: 30px;
+            background-color: #343a40;
+            display: flex;
+            border-radius: 50px;
+            align-items: center;
+            justify-content: space-between;
+            padding: 5px;
+            position: relative;
+            transform: scale(1.5);
+        }
+
+        .theme-switch .fa-sun { color: #f39c12; }
+        .theme-switch .fa-moon { color: #f1c40f; }
+        .theme-switch .form-check-input { display: none; }
+        .theme-switch .form-check-input:checked + .form-check-label { background-color: #1b2635; }
+
+        /* Table Styles */
+        .table {
+            color: var(--text-color);
+            background-color: var(--table-bg);
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: var(--table-hover-bg);
+        }
+
+        /* Collapsible Form */
+        #addConstituencyForm {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        #addConstituencyForm.show {
+            max-height: 1000px; /* Adjust this value based on your form's height */
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+            }
+
+            .sidebar-brand span,
+            .nav-link span {
+                display: none;
+            }
+
+            .nav-link {
+                justify-content: center;
+                padding: 0.75rem 0;
+            }
+
+            .nav-link i {
+                margin-right: 0;
+            }
+
+            .main-content {
+                margin-left: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme Switch -->
+    <div class="theme-switch">
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="themeSwitch">
+            <label class="form-check-label" for="themeSwitch">
+                <i class="fas fa-sun"></i>
+                <i class="fas fa-moon"></i>
+            </label>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <i class="fas fa-chart-line"></i>
+            <span>Admin</span>
+        </div>
+        <div class="sidebar-nav">
+            <a href="{{ url_for('admin_dashboard') }}" class="nav-link active">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('dashboard') }}" class="nav-link">
+                <i class="fas fa-user"></i>
+                <span>View As User</span>
+            </a>
+            <a href="{{ url_for('manage_constituencies') }}" class="nav-link">
+                <i class="fas fa-map-marked-alt"></i>
+                <span>Constituencies</span>
+            </a>
+            <a href="{{ url_for('manage_managers') }}" class="nav-link">
+                <i class="fas fa-users-cog"></i>
+                <span>Managers</span>
+            </a>
+            <a href="{{ url_for('manage_helpers') }}" class="nav-link">
+                <i class="fas fa-hands-helping"></i>
+                <span>Helpers</span>
+            </a>
+            <a href="{{ url_for('logout') }}" class="nav-link">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <h2 class="text-center mb-4">Manage Constituencies</h2>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show">
+                        <i class="fas fa-info-circle me-2"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Search Form -->
+        <div class="card mb-4 shadow">
+            <div class="card-body">
+                <form action="{{ url_for('manage_constituencies') }}" method="GET">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" class="form-control" name="search" 
+       placeholder="Search by name, MP, email, area, or country" 
+       value="{{ search_query }}">
+                        <button type="submit" class="btn btn-primary">
+                            Search
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add Constituency Button -->
+        <button class="btn btn-primary mb-4" id="toggleAddForm">
+            <i class="fas fa-plus-circle me-2"></i>Add New Constituency
+        </button>
+
+        <!-- Add Constituency Form (Collapsible) -->
+        <div id="addConstituencyForm" class="card mb-4 shadow">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-plus-circle me-2"></i>
+                    Add New Constituency
+                </h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('manage_constituencies') }}" method="POST">
+                    <input type="hidden" name="action" value="add">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="name" class="form-label">
+                                <i class="fas fa-tag me-2"></i>Name
+                            </label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="mp" class="form-label">
+                                <i class="fas fa-user me-2"></i>MP
+                            </label>
+                            <input type="text" class="form-control" id="mp" name="mp" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="mp_email" class="form-label">
+                                <i class="fas fa-envelope me-2"></i>MP Email
+                            </label>
+                            <input type="email" class="form-control" id="mp_email" name="mp_email">
+                        </div>                        
+                        <div class="col-md-6 mb-3">
+                            <label for="area" class="form-label">
+                                <i class="fas fa-map-marker-alt me-2"></i>Area
+                            </label>
+                            <input type="text" class="form-control" id="area" name="area" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="country" class="form-label">
+                                <i class="fas fa-globe me-2"></i>Country
+                            </label>
+                            <input type="text" class="form-control" id="country" name="country" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Add Constituency
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Constituencies Table Card -->
+        <div class="card shadow">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>
+                    Existing Constituencies
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>MP</th>
+                                <th>MP Email</th>
+                                <th>Area</th>
+                                <th>Country</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for constituency in constituencies %}
+                                <tr>
+                                    <td>{{ constituency['constituency_id'] }}</td>
+                                    <td>{{ constituency['name'] }}</td>
+                                    <td>{{ constituency['mp'] }}</td>
+                                    <td>{{ constituency['mp_email'] }}</td>
+                                    <td>{{ constituency['area'] }}</td>
+                                    <td>{{ constituency['country'] }}</td>
+                                    <td>
+                                        <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#updateModal{{ constituency['constituency_id'] }}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <form action="{{ url_for('delete_constituency', constituency_id=constituency['constituency_id']) }}" method="POST" class="d-inline">
+                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this constituency?');">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+
+                                <!-- Update Modal -->
+                                <div class="modal fade" id="updateModal{{ constituency['constituency_id'] }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">
+                                                    <i class="fas fa-edit me-2"></i>
+                                                    Edit Constituency
+                                                </h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <form action="{{ url_for('manage_constituencies') }}" method="POST">
+                                                <div class="modal-body">
+                                                    <input type="hidden" name="action" value="update">
+                                                    <input type="hidden" name="constituency_id" value="{{ constituency['constituency_id'] }}">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">
+                                                            <i class="fas fa-tag me-2"></i>Name
+                                                        </label>
+                                                        <input type="text" class="form-control" name="name" value="{{ constituency['name'] }}" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">
+                                                            <i class="fas fa-user me-2"></i>MP
+                                                        </label>
+                                                        <input type="text" class="form-control" name="mp" value="{{ constituency['mp'] }}" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">
+                                                            <i class="fas fa-envelope me-2"></i>MP Email
+                                                        </label>
+                                                        <input type="email" class="form-control" name="mp_email" value="{{ constituency['mp_email'] }}" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">
+                                                            <i class="fas fa-map-marker-alt me-2"></i>Area
+                                                        </label>
+                                                        <input type="text" class="form-control" name="area" value="{{ constituency['area'] }}" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">
+                                                            <i class="fas fa-globe me-2"></i>Country
+                                                        </label>
+                                                        <input type="text" class="form-control" name="country" value="{{ constituency['country'] }}" required>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                        <i class="fas fa-times me-2"></i>Close
+                                                    </button>
+                                                    <button type="submit" class="btn btn-primary">
+                                                        <i class="fas fa-save me-2"></i>Save changes
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Theme switch functionality
+        const themeSwitch = document.getElementById('themeSwitch');
+        const body = document.body;
+
+        function setTheme(isDark) {
+            if (isDark) {
+                body.classList.remove('light-theme');
+                body.classList.add('dark-theme');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                body.classList.remove('dark-theme');
+                body.classList.add('light-theme');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        themeSwitch.addEventListener('change', () => {
+            setTheme(themeSwitch.checked);
+        });
+
+        // Check for saved theme preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            themeSwitch.checked = true;
+            setTheme(true);
+        } else {
+            themeSwitch.checked = false;
+            setTheme(false);
+        }
+
+        // Collapsible Add Constituency Form
+        const toggleAddForm = document.getElementById('toggleAddForm');
+        const addConstituencyForm = document.getElementById('addConstituencyForm');
+
+        toggleAddForm.addEventListener('click', () => {
+            addConstituencyForm.classList.toggle('show');
+        });
+    </script>
+</body>
+</html>

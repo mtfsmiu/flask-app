@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update User</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            background-color: #212529;
+            color: #e1e1e1;
+            font-family: Arial, sans-serif;
+        }
+
+        .form-container {
+            background-color: #343a40;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 50px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        h2 {
+            color: #ffffff;
+        }
+
+        .form-control {
+            background-color: #495057;
+            color: #e1e1e1;
+            border: none;
+        }
+
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: none;
+        }
+
+        label {
+            font-weight: bold;
+            color: #e1e1e1;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+            padding: 10px 20px;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .navbar {
+            border-bottom: 2px solid #495057;
+        }
+
+        @media (max-width: 768px) {
+            .form-container {
+                padding: 15px;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #343a40;">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 form-container">
+                <h2 class="text-center mb-4">Update User</h2>
+                <form method="POST" action="{{ url_for('update_user_page', user_id=user[0]) }}">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" class="form-control" id="name" name="name" value="{{ user[1] }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email_address">Email Address</label>
+                        <input type="email" class="form-control" id="email_address" name="email_address" value="{{ user[2] }}" required>
+                    </div>
+                    <!-- New Password Field -->
+                    <div class="form-group">
+                        <label for="password">New Password</label>
+                        <input type="password" class="form-control" id="password" name="password" 
+                               placeholder="Leave blank to keep current password">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Update User</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>

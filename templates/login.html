@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Login Form</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, rgb(50, 30, 235) 0%, #d4001c 100%);
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .navbar {
+      background: rgba(26, 35, 126, 0.15);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .navbar-brand, .nav-link {
+      color: white !important;
+      opacity: 0.9;
+      transition: opacity 0.3s ease;
+    }
+
+    .navbar-brand:hover, .nav-link:hover {
+      opacity: 1;
+    }
+
+    .login-container {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 400px;
+      position: relative;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    }
+
+    .user-icon {
+      width: 60px;
+      height: 60px;
+      background: #1a237e;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      top: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-control {
+      background: #1a237e;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      padding: 12px 15px;
+      padding-left: 45px;
+    }
+
+    .form-control:focus {
+      background: #1a237e;
+      color: white;
+      box-shadow: none;
+    }
+
+    .form-control::placeholder {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: white;
+      opacity: 0.7;
+    }
+
+    .btn-login {
+      background: white;
+      color: #1a237e;
+      border: none;
+      border-radius: 8px;
+      padding: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 1rem;
+      transition: transform 0.3s ease;
+    }
+
+    .btn-login:hover {
+      transform: translateY(-2px);
+    }
+
+    .error-message {
+      color: #ff6b6b;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+    }
+
+    .alert {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: white;
+    }
+
+    .links a {
+      color: white;
+      opacity: 0.8;
+      transition: opacity 0.3s ease;
+      text-decoration: none;
+    }
+
+    .links a:hover {
+      opacity: 1;
+      color: white;
+    }
+
+    .links .admin-link {
+      color: #ff6b6b;
+      opacity: 1;
+    }
+
+    .g-recaptcha {
+      display: flex !important;
+      justify-content: center;
+      margin: 1.5rem 0;
+    }
+
+    @media (max-width: 576px) {
+      .login-container {
+        margin: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg">
+    <div class="container">
+      <a class="navbar-brand" href="#"><i class="fas fa-home"></i> Database</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+        <i class="fas fa-bars" style="color: white;"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('register') }}"><i class="fas fa-user-plus"></i> Register</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('admin_login') }}"><i class="fas fa-user-shield"></i> Admin Login</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container d-flex justify-content-center align-items-center" style="min-height: calc(100vh - 76px);">
+    <div class="login-container">
+      <div class="user-icon">
+        <i class="fas fa-user fa-lg"></i>
+      </div>
+      
+      <form action="/login" method="POST" class="mt-5">
+        {{ form.hidden_tag() }}
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show mb-4" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <div class="form-group position-relative">
+          <i class="fas fa-envelope input-icon"></i>
+          {{ form.email(class="form-control", placeholder="Email ID") }}
+          {% if form.email.errors %}
+          <div class="error-message">
+            {% for error in form.email.errors %}
+            {{ error }}
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="form-group position-relative">
+          <i class="fas fa-lock input-icon"></i>
+          {{ form.password(class="form-control", placeholder="Password", id="password-field") }}
+          {% if form.password.errors %}
+          <div class="error-message">
+            {% for error in form.password.errors %}
+            {{ error }}
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          {{ form.recaptcha }}
+          {% if form.recaptcha.errors %}
+          <div class="error-message">
+            {% for error in form.recaptcha.errors %}
+            {{ error }}
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+
+        {{ form.submit(class="btn btn-login btn-block") }}
+
+        <div class="links text-center mt-4">
+          <a href="{{ url_for('register') }}">Don't have an account? Register here.</a><br>
+          <a style="color: rgb(192, 255, 45); font-size: large; font-weight: 700; font-family:Arial, Helvetica, sans-serif;" href="{{ url_for('admin_login') }}" class="admin-link mt-2 d-inline-block">Login as Admin</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
